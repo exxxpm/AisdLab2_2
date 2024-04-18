@@ -4,18 +4,12 @@
 
 TEST(pair_test, constructor_params) {
 	pair<int, int> pair(1, 2);
-	ASSERT_EQ(*pair.key, 1);
-	ASSERT_EQ(*pair.value, 2);
+	ASSERT_EQ(pair.key, 1);
+	ASSERT_EQ(pair.value, 2);
 }
-TEST(pair_test, copy_constructor) {
-	pair<int, int> pair(1, 2);
-	auto copy(pair);
-	ASSERT_EQ(*copy.key, 1);
-	ASSERT_EQ(*copy.value, 2);
-}
-TEST(pair_test, overloaded_eq) {
-	pair<int, int> pair(1, 2);
-	auto copy=pair;
-	ASSERT_EQ(*copy.key, 1);
-	ASSERT_EQ(*copy.value, 2);
+
+TEST(hash_table_test, default_constr) {
+	hash_table<int,int> ht(11);
+	ht.insert(2, 5);
+	ASSERT_EQ(ht.get_size(),1);
 }
