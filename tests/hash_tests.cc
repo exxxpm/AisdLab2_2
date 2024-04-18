@@ -36,3 +36,23 @@ TEST(hash_table_test, insert_with_insert_or_assign) {
 	ht.insert_or_assign(505, 505);
 	ASSERT_EQ(ht.get_size(), 12);
 }
+
+TEST(hash_table_test, contains) {
+	hash_table<int, int> ht(11, 2, 9);
+	ht.insert_or_assign(505, 505);
+	ASSERT_TRUE(ht.contains(505));
+	ASSERT_FALSE(ht.contains(594590505));
+}
+
+TEST(hash_table_test, count) {
+	hash_table<int, int> ht(11, 2, 9);
+	ht.insert_or_assign(505, 505);
+	ASSERT_EQ(ht.count(505),1);
+	ASSERT_EQ(ht.count(594590505),0);
+}
+
+TEST(hash_table_test, searh) {
+	hash_table<int, int> ht(11, 2, 9);
+	ht.insert_or_assign(505, 505);
+	ASSERT_EQ(*ht.search(505), 505);
+}

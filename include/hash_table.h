@@ -104,11 +104,38 @@ public:
 		}
 	}
 
+	bool contains(Value value){//проверка на наличие значения в таблице
+		for (auto& pair : _data){
+			if (pair.is_filled && (pair.value == value)) return true;
+		}
+		return false;
+	}
+
+	size_t count(Key key){//т.к у нас ключи повторяться не могут, то мы возвращаем либо 0 либо 1.если встретили такой ключ,то сразу вернем 1,т.к гарантируем, что ключ всего 1
+		for (auto& pair : _data) {
+			if (pair.is_filled && (pair.key == key)) return 1;
+		}
+		return 0;
+	}
+
+	Value* search(Key key){
+		for (size_t i = 0; i < _data.size(); ++i){
+			size_t index = (hash(key) + i * hash(key)) % _data.size();
+			if (_data[index].is_filled && _data[index].key == key){
+				return &(_data[index].value);
+			}
+		}
+		return nullptr;
+	}
+
 	size_t hash(Key key) {//метод многократного сдвига
 		int first_part = static_cast<int>(std::fmod(static_cast<double>(key * FIXED_INT), std::pow(2, MACHINE_WORD)));
 		int l = static_cast<int>(std::log2(_data.size()));
 		return (first_part >> static_cast<int>(MACHINE_WORD - l));
 	}
+
+	
+
 	size_t size() const noexcept { return _size; }
 
 	void print(){
