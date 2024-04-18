@@ -19,6 +19,18 @@ TEST(hash_table_test, rand_constr) {
 	ASSERT_EQ(ht.get_size(), 11);
 }
 
+TEST(hash_table_test, copy_constr) {
+	hash_table<int, int> ht(11, 2, 9);
+	auto copy(ht);
+	ASSERT_TRUE(ht==copy);
+}
+
+TEST(hash_table_test, overloaded_eq) {
+	hash_table<int, int> ht(11, 2, 9);
+	auto copy=ht;
+	ASSERT_TRUE(ht == copy);
+}
+
 TEST(hash_table_test, insert) {
 	hash_table<int, int> ht(11, 2, 9);
 	ht.insert(66, 7);
@@ -55,4 +67,13 @@ TEST(hash_table_test, searh) {
 	hash_table<int, int> ht(11, 2, 9);
 	ht.insert_or_assign(505, 505);
 	ASSERT_EQ(*ht.search(505), 505);
+}
+
+TEST(hash_table_test, erase) {
+	hash_table<int, int> ht(11, 2, 9);
+	ht.insert_or_assign(505, 505);
+	ASSERT_TRUE(ht.erase(505));
+	ASSERT_EQ(ht.get_size(), 11);
+	ASSERT_FALSE(ht.erase(594590505));
+	ASSERT_EQ(ht.get_size(), 11);
 }

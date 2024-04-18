@@ -18,6 +18,14 @@ struct pair {
 	pair() : key(NULL), value(NULL), is_filled(false) {};
 	pair(Key key, Value val) :key(key), value(val), is_filled(true) {};
 
+	bool operator==(const pair& other){
+		return key == other.key && value == other.value && is_filled == other.is_filled;
+	}
+
+	bool operator!=(const pair& other) {
+		return !(*this == other);
+	}
+
 	friend std::ostream& operator<<(std::ostream& stream,const pair& pair) {
 		stream << "(" << pair.key << "," << pair.value << ")";
 		return stream;
@@ -48,7 +56,7 @@ public:
 		_data.resize(size);
 	}
 
-	hash_table(size_t size, const Value& min, const Value& max): _size(0){
+	hash_table(size_t size, const Value& min, const Value& max): _size(0){//макс и мин в основном нужны чтобы вызывался именно тот коструктор который мы хотим. иначе у них сигнатура одинаковая
 		if (!size) {
 			throw std::invalid_argument("invalid size");
 		}
@@ -61,10 +69,36 @@ public:
 		}
 	}
 
-	size_t get_size() { return _size; }
-
-	void insert(const Key& key, const Value& value)
+	hash_table(const hash_table& other) : _size(other._size)
 	{
+		if (other == *this) return;
+		for (auto& pair : other._data)
+		{
+			if (pair.is_filled) insert(pair.key, pair.value);
+		}
+	}
+
+	hash_table& operator=(hash_table other) {//передаем копию специяально! не по конст ссылке, чтоб не делать копию самостоятельно
+		swap(other);
+		return *this;
+	}
+
+	void swap(hash_table& other) noexcept {//для оператора =
+		std::swap(_data, other._data);
+		std::swap(_size, other._size);
+	}
+
+	size_t get_size() const noexcept { return _size; }
+
+	bool operator==(const hash_table& other){
+		if (_size != other._size) return false;
+		for (size_t i = 0; i < std::min(this->_data.size(), other._data.size()); ++i){//берем минимальный размер вектора из двух,чтоб не делать лишних итераций
+			if (this->_data[i] != other._data[i]) return false;
+		}
+		return true;
+	}
+
+	void insert(const Key& key, const Value& value){
 		if (_size) {
 			double load_factor = _size / (_data.size() + 0.0);//считаем коэф загруженности и увеличиваем размер таблицыБ если он больше 0.6
 			if (load_factor > 0.6) _grow();
@@ -82,17 +116,14 @@ public:
 		}
 	}
 
-	void insert_or_assign(const Key& key, const Value& value)
-	{
+	void insert_or_assign(const Key& key, const Value& value){
 		if (_size) {
 			double load_factor = _size / (_data.size() + 0.0);
 			if (load_factor > 0.6) _grow();
 		}
-		for (size_t i = 0; i < _data.size(); ++i)
-		{
+		for (size_t i = 0; i < _data.size(); ++i){
 			size_t index = (hash(key) + i * hash(key)) % _data.size();//опять считаем индекс методом двойного хеширования
-			if (!_data[index].is_filled)//если нет элемента вставляем, если есть обновляем
-			{
+			if (!_data[index].is_filled){//если нет элемента вставляем, если есть обновляем
 				_data[index] = pair(key, value);
 				++_size;
 				return;
@@ -128,15 +159,23 @@ public:
 		return nullptr;
 	}
 
+	bool erase(Key key){
+		for (size_t i = 0; i < _data.size(); ++i){
+			size_t index = (hash(key) + i * hash(key)) % _data.size();
+			if (_data[index].is_filled && _data[index].key == key){
+				_data[index].is_filled = false;//фактически мы его не удаляем, просто говорим, что его нет (нам же не надо менять размер таблицы, просто будем считать, что удалили)
+				--_size;
+				return true;
+			}
+		}
+		return false;
+	}
+
 	size_t hash(Key key) {//метод многократного сдвига
 		int first_part = static_cast<int>(std::fmod(static_cast<double>(key * FIXED_INT), std::pow(2, MACHINE_WORD)));
 		int l = static_cast<int>(std::log2(_data.size()));
 		return (first_part >> static_cast<int>(MACHINE_WORD - l));
 	}
-
-	
-
-	size_t size() const noexcept { return _size; }
 
 	void print(){
 		for (auto& pair : _data)
