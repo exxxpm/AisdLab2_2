@@ -5,9 +5,8 @@
 #define MACHINE_WORD sizeof(size_t)//размер машинного слова
 #define PARAM_A ((std::sqrt(5)-1)/2) // нут предложил использовать числа близкие к значению золотого сечени€
 #define FIXED_INT (PARAM_A*std::pow(2,MACHINE_WORD)) //константа от 0 до 2^MACHINE_WORD
-#define COUNT_ROME_NUMS 7
 
-enum class rome_nums {I = 1, V = 5, X = 10, L = 50, C = 100, D = 500, M = 1000};
+enum class roman_nums {I = 1, V = 5, X = 10, L = 50, C = 100, D = 500, M = 1000};
 
 template<class Key,class Value>
 struct pair {
@@ -184,3 +183,25 @@ public:
 		}
 	}
 };
+
+size_t hash(const std::string& roman) { //хеш функци€ по задаче, переводит римские в арабские
+	size_t result = 0, prev = 0;
+	for (int i = roman.length() - 1; i >= 0; i--) {
+		char symbol = roman[i];
+		int cur = 0;
+		switch (symbol) {//находим значение текущего символа
+		case 'I': cur = static_cast<int>(roman_nums::I); break;
+		case 'V': cur = static_cast<int>(roman_nums::V); break;
+		case 'X': cur = static_cast<int>(roman_nums::X); break;
+		case 'L': cur = static_cast<int>(roman_nums::L); break;
+		case 'C': cur = static_cast<int>(roman_nums::C); break;
+		case 'D': cur = static_cast<int>(roman_nums::D); break;
+		case 'M': cur = static_cast<int>(roman_nums::M); break;
+		default:
+			throw std::invalid_argument("");
+		}
+		cur < prev ? result -= cur : result += cur;//если предыдущее меньше текушего,то убавл€ем, если нет - прибавл€ем
+		prev = cur;
+	}
+	return result;
+}

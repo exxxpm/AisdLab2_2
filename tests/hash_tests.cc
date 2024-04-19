@@ -77,3 +77,12 @@ TEST(hash_table_test, erase) {
 	ASSERT_FALSE(ht.erase(594590505));
 	ASSERT_EQ(ht.get_size(), 11);
 }
+
+TEST(hash_func, rome_to_arabian) {
+	EXPECT_EQ(hash("MMMDCCLXXII"), 3772);
+	EXPECT_EQ(hash("MCCCLXXV"), 1375);
+	EXPECT_EQ(hash("MMMMMDCCXLIII"), 5743);
+	EXPECT_EQ(hash(""), 0);
+	EXPECT_EQ(hash("CCV"), 205);
+	EXPECT_EQ(hash("XX"), 20);
+}
