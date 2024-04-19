@@ -24,7 +24,10 @@ set(gtest_force_shared_crt ON CACHE BOOL "" FORCE)
 FetchContent_MakeAvailable(googletest)
 
 # Объявляем библиотеку
-add_library(hash_table SHARED "include/hash_table.h")
+add_library(hash_table SHARED
+    "include/hash_table.h"
+    "src/hash_table.cc"
+)
 target_include_directories(hash_table PUBLIC "include")
 
 # Объявляем тесты
