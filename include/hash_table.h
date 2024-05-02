@@ -2,9 +2,9 @@
 #include <vector>
 #include <cmath>
 
-#define MACHINE_WORD sizeof(size_t)//размер машинного слова
-#define PARAM_A ((std::sqrt(5)-1)/2) //Кнут предложил использовать числа близкие к значению золотого сечения
-#define FIXED_INT (PARAM_A*std::pow(2,MACHINE_WORD)) //константа от 0 до 2^MACHINE_WORD
+#define MACHINE_WORD sizeof(size_t)
+#define PARAM_A ((std::sqrt(5)-1)/2)
+#define FIXED_INT (PARAM_A*std::pow(2,MACHINE_WORD)) 
 
 enum class roman_nums {I = 1, V = 5, X = 10, L = 50, C = 100, D = 500, M = 1000};
 
@@ -34,9 +34,9 @@ struct pair {
 template <class Key, class Value>
 class hash_table {
 	std::vector<pair<Key, Value>> _data;
-	size_t _size;//колличество занятых ячеек
+	size_t _size;
 
-	void _grow() {//увеличивает размер хеш таблицы, нужен когда коэф загруженности больше 0.6
+	void _grow() {
 		std::vector<pair<Key, Value>> tmp;
 		tmp.resize((_data.size() + 1)* 1.7);
 		std::swap(tmp, _data);
@@ -55,13 +55,13 @@ public:
 		_data.resize(size);
 	}
 
-	hash_table(size_t size, const Value& min, const Value& max): _size(0){//макс и мин в основном нужны чтобы вызывался именно тот коструктор который мы хотим. иначе у них сигнатура одинаковая
+	hash_table(size_t size, const Value& min, const Value& max): _size(0){
 		if (!size) {
 			throw std::invalid_argument("invalid size");
 		}
 		_data.resize(size);
 		for (int i = 0; i < size; ++i) {
-			Value value = rand() % (max - min + 1) + min;//рандомное значение
+			Value value = rand() % (max - min + 1) + min;
 			_data[i] = pair(i+1, value);
 			++_size;
 			_data[i].is_filled = true;
@@ -77,12 +77,12 @@ public:
 		}
 	}
 
-	hash_table& operator=(hash_table other) {//передаем копию специяально! не по конст ссылке, чтоб не делать копию самостоятельно
+	hash_table& operator=(hash_table other) {
 		swap(other);
 		return *this;
 	}
 
-	void swap(hash_table& other) noexcept {//для оператора =
+	void swap(hash_table& other) noexcept {
 		std::swap(_data, other._data);
 		std::swap(_size, other._size);
 	}
@@ -91,7 +91,7 @@ public:
 
 	bool operator==(const hash_table& other){
 		if (_size != other._size) return false;
-		for (size_t i = 0; i < std::min(this->_data.size(), other._data.size()); ++i){//берем минимальный размер вектора из двух,чтоб не делать лишних итераций
+		for (size_t i = 0; i < std::min(this->_data.size(), other._data.size()); ++i){
 			if (this->_data[i] != other._data[i]) return false;
 		}
 		return true;
@@ -99,12 +99,12 @@ public:
 
 	void insert(const Key& key, const Value& value){
 		if (_size) {
-			double load_factor = _size / (_data.size() + 0.0);//считаем коэф загруженности и увеличиваем размер таблицыБ если он больше 0.6
+			double load_factor = _size / (_data.size() + 0.0);
 			if (load_factor > 0.6) _grow();
 		}
 		for (size_t i = 0; i < _data.size(); ++i)
 		{
-			size_t index = (hash(key) + i * hash(key)) % _data.size();//пробирование с помощью двойного хеширования
+			size_t index = (hash(key) + i * hash(key)) % _data.size();
 			if (!_data[index].is_filled)
 			{
 				_data[index] = pair(key, value);
@@ -121,8 +121,8 @@ public:
 			if (load_factor > 0.6) _grow();
 		}
 		for (size_t i = 0; i < _data.size(); ++i){
-			size_t index = (hash(key) + i * hash(key)) % _data.size();//опять считаем индекс методом двойного хеширования
-			if (!_data[index].is_filled){//если нет элемента вставляем, если есть обновляем
+			size_t index = (hash(key) + i * hash(key)) % _data.size();
+			if (!_data[index].is_filled){
 				_data[index] = pair(key, value);
 				++_size;
 				return;
@@ -134,14 +134,14 @@ public:
 		}
 	}
 
-	bool contains(Value value){//проверка на наличие значения в таблице
+	bool contains(Value value){
 		for (auto& pair : _data){
 			if (pair.is_filled && (pair.value == value)) return true;
 		}
 		return false;
 	}
 
-	size_t count(Key key){//т.к у нас ключи повторяться не могут, то мы возвращаем либо 0 либо 1.если встретили такой ключ,то сразу вернем 1,т.к гарантируем, что ключ всего 1
+	size_t count(Key key){
 		for (auto& pair : _data) {
 			if (pair.is_filled && (pair.key == key)) return 1;
 		}
@@ -162,15 +162,14 @@ public:
 		for (size_t i = 0; i < _data.size(); ++i){
 			size_t index = (hash(key) + i * hash(key)) % _data.size();
 			if (_data[index].is_filled && _data[index].key == key){
-				_data[index].is_filled = false;//фактически мы его не удаляем, просто говорим, что его нет (нам же не надо менять размер таблицы, просто будем считать, что удалили)
-				--_size;
+				_data[index].is_filled = false;
 				return true;
 			}
 		}
 		return false;
 	}
 
-	size_t hash(Key key) {//метод многократного сдвига
+	size_t hash(Key key) {
 		int first_part = static_cast<int>(std::fmod(static_cast<double>(key * FIXED_INT), std::pow(2, MACHINE_WORD)));
 		int l = static_cast<int>(std::log2(_data.size()));
 		return (first_part >> static_cast<int>(MACHINE_WORD - l));
@@ -184,12 +183,12 @@ public:
 	}
 };
 
-size_t hash(const std::string& roman) { //хеш функция по задаче, переводит римские в арабские
+size_t hash(const std::string& roman) { 
 	size_t result = 0, prev = 0;
 	for (int i = roman.length() - 1; i >= 0; i--) {
 		char symbol = roman[i];
 		int cur = 0;
-		switch (symbol) {//находим значение текущего символа
+		switch (symbol) {
 		case 'I': cur = static_cast<int>(roman_nums::I); break;
 		case 'V': cur = static_cast<int>(roman_nums::V); break;
 		case 'X': cur = static_cast<int>(roman_nums::X); break;
@@ -200,7 +199,7 @@ size_t hash(const std::string& roman) { //хеш функция по задаче, переводит римск
 		default:
 			throw std::invalid_argument("");
 		}
-		cur < prev ? result -= cur : result += cur;//если предыдущее меньше текушего,то убавляем, если нет - прибавляем
+		cur < prev ? result -= cur : result += cur;
 		prev = cur;
 	}
 	return result;
