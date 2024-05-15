@@ -104,7 +104,7 @@ public:
 		}
 		for (size_t i = 0; i < _data.size(); ++i)
 		{
-			size_t index = (hash(key) + i * hash(key)) % _data.size();
+			size_t index = (hash(key) + i * std::hash<Key>{}(key)) % _data.size();
 			if (!_data[index].is_filled)
 			{
 				_data[index] = pair(key, value);
@@ -121,7 +121,7 @@ public:
 			if (load_factor > 0.6) _grow();
 		}
 		for (size_t i = 0; i < _data.size(); ++i){
-			size_t index = (hash(key) + i * hash(key)) % _data.size();
+			size_t index = (hash(key) + i * std::hash<Key>{}(key)) % _data.size();
 			if (!_data[index].is_filled){
 				_data[index] = pair(key, value);
 				++_size;
@@ -150,7 +150,7 @@ public:
 
 	Value* search(Key key){
 		for (size_t i = 0; i < _data.size(); ++i){
-			size_t index = (hash(key) + i * hash(key)) % _data.size();
+			size_t index = (hash(key) + i * std::hash<Key>{}(key)) % _data.size();
 			if (_data[index].is_filled && _data[index].key == key){
 				return &(_data[index].value);
 			}
@@ -160,9 +160,10 @@ public:
 
 	bool erase(Key key){
 		for (size_t i = 0; i < _data.size(); ++i){
-			size_t index = (hash(key) + i * hash(key)) % _data.size();
+			size_t index = (hash(key) + i * std::hash<Key>{}(key)) % _data.size();
 			if (_data[index].is_filled && _data[index].key == key){
 				_data[index].is_filled = false;
+                --_size;
 				return true;
 			}
 		}
